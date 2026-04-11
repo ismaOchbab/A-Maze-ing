@@ -93,6 +93,27 @@ class Maze:
             self.get_cell(x2, y2).remove_wall('S')
         else:
             raise ValueError("Cells are not adjacent")
+    
+    def add_wall_between(self,
+                         cell1: Tuple[int, int],
+                         cell2: Tuple[int, int]) -> None:
+        x1, y1 = cell1
+        x2, y2 = cell2
+
+        if x2 == x1 + 1 and y2 == y1:
+            self.get_cell(x1, y1).add_wall('E')
+            self.get_cell(x2, y2).add_wall('W')
+        elif x2 == x1 - 1 and y2 == y1:
+            self.get_cell(x1, y1).add_wall('W')
+            self.get_cell(x2, y2).add_wall('E')
+        elif y2 == y1 + 1 and x2 == x1:
+            self.get_cell(x1, y1).add_wall('S')
+            self.get_cell(x2, y2).add_wall('N')
+        elif y2 == y1 - 1 and x2 == x1:
+            self.get_cell(x1, y1).add_wall('N')
+            self.get_cell(x2, y2).add_wall('S')
+        else:
+            raise ValueError("Cells are not adjacent")
 
     # Post generation verifications
 
@@ -101,31 +122,17 @@ class Maze:
         Checks that all border cells have their outer walls closed
         except at entry and exit
         """
-        # North border (y = 0)
         for x in range(self.width):
-            if (x, 0) != self.entry and (x, 0) != self.exit:
-                if not self.get_cell(x, 0).has_wall('N'):
-                    return False
+            if not self.get_cell(x, 0).has_wall('N'):
+                return False
+            if not self.get_cell(x, self.height - 1).has_wall('S'):
+                return False
 
-        # East border (x = width - 1)
         for y in range(self.height):
-            if (self.width - 1, y) != self.entry\
-                    and (self.width - 1, y) != self.exit:
-                if not self.get_cell(self.width - 1, y).has_wall('E'):
-                    return False
-
-        # South border (y = height - 1)
-        for x in range(self.width):
-            if (x, self.height - 1) != self.entry\
-                    and (x, self.height - 1) != self.exit:
-                if not self.get_cell(x, self.height - 1).has_wall('S'):
-                    return False
-
-        # West border (x = 0)
-        for y in range(self.height):
-            if (0, y) != self.entry and (0, y) != self.exit:
-                if not self.get_cell(0, y).has_wall('W'):
-                    return False
+            if not self.get_cell(0, y).has_wall('W'):
+                return False
+            if not self.get_cell(self.width - 1, y).has_wall('E'):
+                return False
         return True
 
     def is_fully_connected(self) -> bool:
@@ -133,6 +140,9 @@ class Maze:
         Checks if all cells are reachable from the entry
         """
         if self.width == 0 or self.height == 0:
+            return False
+        if self.get_cell(*self.entry).protected\
+            or self.get_cell(*self.exit).protected:
             return False
 
         visited = [[False] * self.width for _ in range(self.height)]
@@ -158,12 +168,18 @@ class Maze:
                     nx, ny = x - 1, y
                 else:
                     continue
+
+                if self.get_cell(nx, ny).protected:
+                    continue
+
                 if not visited[ny][nx]:
                     visited[ny][nx] = True
                     queue.append((nx, ny))
 
         for y in range(self.height):
             for x in range(self.width):
+                if self.get_cell(x, y).protected:
+                    continue
                 if not visited[y][x]:
                     return False
         return True
@@ -221,42 +237,52 @@ class Maze:
     # 42 pattern (to be called by the generator)
     def apply_42_pattern(self) -> bool:
         """
-        Mark cells forming "42" pattern as completely closed (all walls = 1).
+        Draw the visible '42' as protected fully-closed cells.
+        Returns False if the maze is too small.
         """
         pattern_4 = [
-            [1,0,1],
-            [1,0,1],
-            [1,1,1],
-            [0,0,1],
-            [0,0,1]
+            [1, 0, 1],
+            [1, 0, 1],
+            [1, 1, 1],
+            [0, 0, 1],
+            [0, 0, 1],
         ]
         pattern_2 = [
-            [1,1,1],
-            [0,0,1],
-            [1,1,1],
-            [1,0,0],
-            [1,1,1]
+            [1, 1, 1],
+            [0, 0, 1],
+            [1, 1, 1],
+            [1, 0, 0],
+            [1, 1, 1],
         ]
-        
-        if self.width < 6 or self.height < 5:
+
+        # width = 3 + 1 gap + 3 = 7
+        if self.width < 7 or self.height < 5:
+            print("Warning: maze too small to place the '42' pattern.")
             return False
-        
-        start_x = (self.width - 6) // 2
+
+        start_x = (self.width - 7) // 2
         start_y = (self.height - 5) // 2
-        
+
+        protected_positions = set()
+
         for dy in range(5):
             for dx in range(3):
                 if pattern_4[dy][dx] == 1:
-                    cell = self.get_cell(start_x + dx, start_y + dy)
-                    cell.protected = True
-                    for direction in ['N', 'E', 'S', 'W']:
-                        cell.set_direction(direction, 1)
+                    protected_positions.add((start_x + dx, start_y + dy))
                 if pattern_2[dy][dx] == 1:
-                    cell = self.get_cell(start_x + 4 + dx, start_y + dy)
-                    cell.protected = True
-                    for direction in ['N', 'E', 'S', 'W']:
-                        cell.set_direction(direction, 1)
-        
+                    protected_positions.add((start_x + 4 + dx, start_y + dy))
+
+        if self.entry in protected_positions or self.exit in protected_positions:
+            print(
+                "Warning: '42' pattern overlaps entry or exit, pattern omitted.")
+            return False
+
+        for x, y in protected_positions:
+            cell = self.get_cell(x, y)
+            cell.protected = True
+            for direction in ['N', 'E', 'S', 'W']:
+                cell.set_direction(direction, 1)
+
         return True
 
     def find_shortest_path(self,

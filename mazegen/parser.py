@@ -106,7 +106,7 @@ class Parsing:
             if len(exit_parts) != 2:
                 raise ValueError
             xx, xy = int(exit_parts[0]), int(exit_parts[1])
-            if not (0 < xx < self.width and 0 < xy < self.height):
+            if not (0 <= xx < self.width and 0 <= xy < self.height):
                 raise ValueError("Out of bounds")
             self.exit = {'x': xx, 'y': xy}
         except ValueError:
