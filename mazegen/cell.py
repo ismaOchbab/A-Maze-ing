@@ -14,6 +14,9 @@ class Cell:
                  E: int = 1,
                  S: int = 1,
                  W: int = 1) -> None:
+        """
+        initializes the cell with all borders set to 1 (closed cell)
+        """
         if not all(obj.validate_direction(d)
                    for d in (N, E, S, W)):
             raise CellDirectionException(

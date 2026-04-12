@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import time
 import random
@@ -9,7 +11,9 @@ from parser import Parsing
 
 
 class MazeRenderer:
-    """Simple terminal maze renderer with ANSI colors and keyboard interaction."""
+    """
+    Simple terminal maze renderer with ANSI colors and keyboard interaction.
+    """
 
     # color codes
     COLORS = {
@@ -51,9 +55,13 @@ class MazeRenderer:
         self._path_cells: Optional[List[Tuple[int, int]]] = None
 
     def _get_path_cells(self) -> List[Tuple[int, int]]:
-        """Return list of (x, y) coordinates on the shortest path from entry to exit."""
+        """
+        Return list of (x, y) coordinates on the shortest path
+        from entry to exit.
+        """
         if self._path_cells is None:
-            path_str = self.maze.find_shortest_path(self.maze.entry, self.maze.exit)
+            path_str = self.maze\
+                        .find_shortest_path(self.maze.entry, self.maze.exit)
             if not path_str:
                 self._path_cells = []
                 return self._path_cells
@@ -95,7 +103,7 @@ class MazeRenderer:
         else:
             content = ' '  # empty space for open cell
             color = 'reset'
-            
+
             if self.show_path and (x, y) in self._get_path_cells():
                 color = path_color
                 content = '●'
@@ -200,20 +208,21 @@ class MazeRenderer:
                 self.clear_screen()
 
 
-def main():
-    """Example usage"""
-    parser = Parsing("config.txt")
-    parser.parse()
-    maze = Maze(parser)
-    maze.apply_42_pattern()
-    
-    from maze_generator import MazeGenerator
-    generator = MazeGenerator(maze)
-    generator.generate()
-    
-    renderer = MazeRenderer(generator.maze, generator, parser)
-    renderer.run()
-
-
 if __name__ == '__main__':
-    main()
+    try:
+        parser = Parsing("config.txt")
+        parser.parse()
+        maze = Maze(parser)
+        maze.apply_42_pattern()
+
+        from maze_generator import MazeGenerator
+        generator = MazeGenerator(maze)
+        generator.generate()
+
+        renderer = MazeRenderer(generator.maze, generator, parser)
+        renderer.run()
+    except Exception as e:
+        print(
+            f"Caught an error: {e}"
+        )
+        exit()

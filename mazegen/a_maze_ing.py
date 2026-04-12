@@ -6,6 +6,7 @@ import sys
 from parser import Parsing, ConfigError
 from maze import Maze
 from maze_generator import MazeGenerator
+from visualizer import MazeRenderer
 
 
 class MazeError(Exception):
@@ -32,7 +33,10 @@ def build_maze(config_path: str) -> tuple[Maze, Parsing]:
 
     pattern_applied = maze.apply_42_pattern()
     if not pattern_applied:
-        print("Warning: maze too small to place the '42' pattern.", file=sys.stderr)
+        print(
+            "Warning: maze too small to place the '42' pattern.",
+            file=sys.stderr
+            )
 
     generator = MazeGenerator(maze)
     generator.generate()
@@ -57,7 +61,8 @@ def write_output_file(maze: Maze, output_path: str) -> None:
         with open(output_path, "w", encoding="utf-8") as file:
             file.write(maze.to_hex_output())
     except OSError as exc:
-        raise MazeError(f"Cannot write output file '{output_path}': {exc}") from exc
+        raise MazeError(
+            f"Cannot write output file '{output_path}': {exc}") from exc
 
 
 def run(config_path: str) -> Maze:
@@ -104,4 +109,25 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # sys.exit(main())
+    if len(sys.argv) != 2:
+        print("Usage: python3 a_maze_ing.py config.txt", file=sys.stderr)
+        exit()
+
+    try:
+        parser = Parsing(sys.argv[1])
+        parser.parse()
+        maze = Maze(parser)
+        maze.apply_42_pattern()
+
+        generator = MazeGenerator(maze)
+        generator.generate()
+
+        renderer = MazeRenderer(generator.maze, generator, parser)
+        renderer.run()
+    except Exception as e:
+        print(
+            f"Caught an error: {e}"
+        )
+        exit()
+    

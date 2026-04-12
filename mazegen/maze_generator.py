@@ -1,4 +1,5 @@
-# mazegen/generator.py
+#!/usr/bin/env python3
+
 import random
 from typing import List, Tuple, Set
 from maze import Maze
@@ -20,14 +21,13 @@ class MazeGenerator:
             maze: A Maze instance already configured with dimensions, entry,
                 exit, and optional protected cells.
 
-        Notes:
-            If a seed is defined in the maze configuration, it is used to make
-            generation reproducible.
+        If a seed is defined in the maze configuration, it is used to make
+        generation reproducible.
         """
         self.maze = maze
-        if maze.seed is not None:
-            random.seed(maze.seed)
-        
+        # if maze.seed is not None:
+        #     random.seed(maze.seed)
+
         # Mark protected cells (all walls = 1, check individual walls)
         self._protected_cells: Set[Tuple[int, int]] = set()
         for y in range(maze.height):
@@ -50,9 +50,9 @@ class MazeGenerator:
         visited = [[False] * self.maze.width for _ in range(self.maze.height)]
         for (x, y) in self._protected_cells:
             visited[y][x] = True
-        
+
         self._carve_passages(self.maze.entry[0], self.maze.entry[1], visited)
-        
+
         if not self.maze.perfect:
             self._add_extra_passages()
 
@@ -67,9 +67,8 @@ class MazeGenerator:
             y: Y coordinate of the current cell.
             visited: 2D matrix tracking which cells have already been visited.
 
-        Notes:
-            A passage is only kept if it does not violate the subject rule that
-            forbids large open areas. Protected cells are never opened.
+        A passage is only kept if it does not violate the subject rule that
+        forbids large open areas. Protected cells are never opened.
         """
         visited[y][x] = True
         dirs = ['N', 'E', 'S', 'W']
@@ -85,12 +84,6 @@ class MazeGenerator:
             if (nx, ny) in self._protected_cells:
                 continue
 
-            # Save state before modification
-            # cell1 = self.maze.get_cell(x, y)
-            # cell2 = self.maze.get_cell(nx, ny)
-            # old_walls1 = {d: cell1.has_wall(d) for d in ['N', 'E', 'S', 'W']}
-            # old_walls2 = {d: cell2.has_wall(d) for d in ['N', 'E', 'S', 'W']}
-
             # Remove wall
             self.maze.remove_wall_between((x, y), (nx, ny))
 
@@ -98,44 +91,14 @@ class MazeGenerator:
                 self._carve_passages(nx, ny, visited)
             else:
                 self.maze.add_wall_between((x, y), (nx, ny))
-                # Restore walls
-                # for d in ['N', 'E', 'S', 'W']:
-                #     if old_walls1[d]:
-                #         cell1.add_wall(d)
-                #     if old_walls2[d]:
-                #         cell2.add_wall(d)
 
     def _add_extra_passages(self) -> None:
         """Open additional walls to create a non-perfect maze.
 
         This method selects candidate internal walls between non-protected
         neighboring cells and removes some of them to introduce multiple paths.
-
-        Notes:
-            Any opening that creates a forbidden large open area must be
-            reverted immediately.
         """
-        # walls = []
-        # for y in range(self.maze.height):
-        #     for x in range(self.maze.width):
-        #         if (x, y) in self._protected_cells:
-        #             continue
-        #         for direction in ['E', 'S']:
-        #             neighbor = self.maze.get_neighbors_in_direction(x, y, direction)
-        #             if neighbor:
-        #                 nx, ny = neighbor
-        #                 if (nx, ny) not in self._protected_cells:
-        #                     cell = self.maze.get_cell(x, y)
-        #                     if cell.has_wall(direction):
-        #                         walls.append(((x, y), neighbor, direction))
 
-        # num_to_open = max(1, len(walls) // 5)
-        # random.shuffle(walls)
-
-        # for (c1, c2, _) in walls[:num_to_open]:
-        #     self.maze.remove_wall_between(c1, c2)
-        #     if not self.maze.has_no_large_openings():
-        #         self.maze.remove_wall_between(c1, c2)  # undo
         walls: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
 
         for y in range(self.maze.height):
@@ -144,7 +107,8 @@ class MazeGenerator:
                     continue
 
                 for direction in ['E', 'S']:
-                    neighbor = self.maze.get_neighbors_in_direction(x, y, direction)
+                    neighbor = self.maze\
+                                .get_neighbors_in_direction(x, y, direction)
                     if neighbor is None:
                         continue
                     if neighbor in self._protected_cells:

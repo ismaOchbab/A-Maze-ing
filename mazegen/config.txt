@@ -1,22 +1,22 @@
 # Dimensions
-WIDTH=30
-HEIGHT=20
+WIDTH=20
+HEIGHT=15
 
 # Entry/Exit coords
-ENTRY=0,0
-EXIT=20,19
+ENTRY=0,1
+EXIT=19,13
 
 # Maze output file path, should not contain spaces
 OUTPUT_FILE=maze.txt
 
 # Enable/disable perfect maze
-PERFECT=no
+PERFECT=false
 
 # Seed-based generation
 SEED=1
 
 # Show/Hide the shortest path
-SHOW_PATH=true
+SHOW_PATH=false
 
 # Display the 42 patern. Default in center if entry/exit coords make it possible
 DISPLAY_FT_PATTERN=True

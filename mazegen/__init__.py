@@ -1,8 +1,8 @@
 __authors__ = "ichbab & ykouiri"
 
-from mazegen.maze import Maze
-from mazegen.maze_generator import MazeGenerator
-from mazegen.cell import Cell
+from maze import Maze
+from maze_generator import MazeGenerator
+from cell import Cell
 
 __all__ = ['Maze',
            'MazeGenerator',

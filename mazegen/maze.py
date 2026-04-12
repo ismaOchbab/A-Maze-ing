@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from cell import Cell
 from parser import Parsing
 from typing import List, Tuple, Optional, Deque
@@ -93,7 +95,7 @@ class Maze:
             self.get_cell(x2, y2).remove_wall('S')
         else:
             raise ValueError("Cells are not adjacent")
-    
+
     def add_wall_between(self,
                          cell1: Tuple[int, int],
                          cell2: Tuple[int, int]) -> None:
@@ -141,7 +143,7 @@ class Maze:
         if self.width == 0 or self.height == 0:
             return False
         if self.get_cell(*self.entry).protected\
-            or self.get_cell(*self.exit).protected:
+                or self.get_cell(*self.exit).protected:
             return False
 
         visited = [[False] * self.width for _ in range(self.height)]
@@ -288,9 +290,10 @@ class Maze:
                 if pattern_2[dy][dx] == 1:
                     protected_positions.add((start_x + 4 + dx, start_y + dy))
 
-        if self.entry in protected_positions or self.exit in protected_positions:
+        if self.entry in protected_positions\
+                or self.exit in protected_positions:
             print(
-                "Warning: '42' pattern overlaps entry or exit, pattern omitted.")
+                "Warning: 42 pattern overlaps entry or exit, pattern omitted.")
             return False
 
         for x, y in protected_positions:
@@ -355,7 +358,7 @@ class Maze:
             row_hex = ''.join(self.get_cell(x, y).get_hex_value()
                               for x in range(self.width))
             lines.append(row_hex)
-            lines.append('')
+        lines.append('')
         lines.append(f"{self.entry[0]}, {self.entry[1]}")
         lines.append(f"{self.exit[0]}, {self.exit[1]}")
         path = self.find_shortest_path(self.entry, self.exit)
@@ -409,10 +412,14 @@ class Maze:
 
 if __name__ == '__main__':
 
-    config = Parsing("config.txt")
-    config.parse()
-    maze = Maze(config=config)
-    maze.apply_42_pattern()
-    print(maze)
-    print()
-    # print(maze.to_hex_output())
+    try:
+        config = Parsing("config.txt")
+        config.parse()
+        maze = Maze(config=config)
+        maze.apply_42_pattern()
+        print(maze)
+        print()
+        print(maze.to_hex_output())
+    except Exception as e:
+        print(f"Caught an error: {e}")
+        exit()
