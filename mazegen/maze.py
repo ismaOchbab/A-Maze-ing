@@ -116,7 +116,6 @@ class Maze:
             raise ValueError("Cells are not adjacent")
 
     # Post generation verifications
-
     def _border_walls_valid(self) -> bool:
         """
         Checks that all border cells have their outer walls closed
@@ -232,6 +231,23 @@ class Maze:
                         break
                 if open_area:
                     return False
+        return True
+
+    # validates all the checks funcs
+    def validate(self) -> bool:
+        """
+        Subject-level validation.
+        """
+        if not self._border_walls_valid():
+            return False
+        if not self.walls_coherence():
+            return False
+        if not self.has_no_large_openings():
+            return False
+        if not self.is_fully_connected():
+            return False
+        if self.find_shortest_path(self.entry, self.exit) == "":
+            return self.entry == self.exit
         return True
 
     # 42 pattern (to be called by the generator)
