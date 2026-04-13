@@ -1,75 +1,42 @@
-#!/usr/bin/env python3
+class Cell():
+    def __init__(self, x: int, y: int, north: int = 1, east: int = 1,
+                 south: int = 1, west: int = 1):
+        self._north = north
+        self._east = east
+        self._south = south
+        self._west = west
+        self._x = x
+        self._y = y
+        self.visited = False
 
-from typing import Self
+    def break_wall(self, direction: str) -> None:
+        if direction == "north":
+            self._north = 0
+        elif direction == "east":
+            self._east = 0
+        elif direction == "south":
+            self._south = 0
+        elif direction == "west":
+            self._west = 0
 
-
-class CellDirectionException(Exception):
-    pass
-
-
-class Cell:
-    "Represents a single maze cell with walls on 4 sides"
-    def __init__(obj: Self,
-                 N: int = 1,
-                 E: int = 1,
-                 S: int = 1,
-                 W: int = 1) -> None:
-        """
-        initializes the cell with all borders set to 1 (closed cell)
-        """
-        if not all(obj.validate_direction(d)
-                   for d in (N, E, S, W)):
-            raise CellDirectionException(
-                "Invalid direction value (must be 0 or 1)")
-        obj.N = N
-        obj.E = E
-        obj.S = S
-        obj.W = W
-        obj.protected = False
-
-    @staticmethod
-    def validate_direction(direction: int) -> bool:
-        return direction in (0, 1)
-
-    def has_wall(obj: Self, direction: str) -> bool:
-        return getattr(obj, f"{direction}") == 1
-
-    def remove_wall(obj: Self, direction: str) -> None:
-        if direction in ('N', 'E', 'S', 'W'):
-            setattr(obj, f"{direction}", 0)
+    def get_direction(self, direction: str) -> int:
+        if direction == "north":
+            return self._north
+        elif direction == "east":
+            return self._east
+        elif direction == "south":
+            return self._south
         else:
-            raise CellDirectionException(
-                f"Invalid direction {direction}")
+            return self._west
 
-    def add_wall(obj: Self, direction: str) -> None:
-        if direction in ('N', 'E', 'S', 'W'):
-            setattr(obj, f"{direction}", 1)
+    def get_coord(self, pos: str) -> int:
+        if pos == 'x':
+            return self._x
         else:
-            raise CellDirectionException(
-                f"Invalid direction {direction}")
+            return self._y
 
-    def directions(obj: Self) -> dict[str, int]:
-        return {
-            'N': obj.N,
-            'E': obj.E,
-            'S': obj.S,
-            'W': obj.W
-        }
+    def get_visit(self) -> bool:
+        return self.visited
 
-    def set_direction(obj: Self, direction: str, value: int) -> None:
-        if not obj.validate_direction(value):
-            raise CellDirectionException(
-                f"Invalid direction value : {value}"
-            )
-        if direction in ('N', 'E', 'S', 'W'):
-            setattr(obj, f'{direction}', value)
-        else:
-            raise CellDirectionException(
-                f"Invalid direction {direction}"
-            )
-
-    def get_hex_value(obj: Self) -> str:
-        """ Returns the hex value of the current cell
-        Order Ordre: W, S, E, N (bits 3,2,1,0)"""
-        bin_str = f"{obj.W}{obj.S}{obj.E}{obj.N}"
-        return hex(int(bin_str, 2))[2:].upper()
+    def set_visit(self) -> None:
+        self.visited = True

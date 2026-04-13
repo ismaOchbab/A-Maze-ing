@@ -1,148 +1,159 @@
-#!/usr/bin/env python3
-
 import random
-from typing import List, Tuple, Set
-from maze import Maze
-from parser import Parsing
+import os
+from .cell import Cell
+from .maze import Maze
+from .visualizer import MazeRenderer
+import time
 
 
 class MazeGenerator:
-    """Generate a maze from a Maze instance.
-
-    This class applies the maze generation algorithm while preserving any
-    protected cells used to draw the visible "42" pattern required by the
-    subject. It supports both perfect and non-perfect mazes depending on
-    the maze configuration.
-    """
-    def __init__(self, maze: Maze) -> None:
-        """Initialize the generator with a maze object.
-
-        Args:
-            maze: A Maze instance already configured with dimensions, entry,
-                exit, and optional protected cells.
-
-        If a seed is defined in the maze configuration, it is used to make
-        generation reproducible.
-        """
+    def __init__(self, maze: Maze, seed: int | None = None):
         self.maze = maze
-        # if maze.seed is not None:
-        #     random.seed(maze.seed)
+        if seed is not None:
+            random.seed(seed)
 
-        # Mark protected cells (all walls = 1, check individual walls)
-        self._protected_cells: Set[Tuple[int, int]] = set()
-        for y in range(maze.height):
-            for x in range(maze.width):
-                cell = maze.get_cell(x, y)
-                # if all(cell.has_wall(d) for d in ['N', 'E', 'S', 'W']):
-                if cell.protected:
-                    self._protected_cells.add((x, y))
+    def check_neighbour(self, cell: Cell) -> list[Cell]:
+        x = cell.get_coord('x')
+        y = cell.get_coord('y')
+        neighbour: list[Cell] = []
+        if (y + 1 < self.maze.height and
+           self.maze.grid[y + 1][x].visited is False):
+            neighbour.append(self.maze.grid[y + 1][x])
+        if y - 1 >= 0 and self.maze.grid[y - 1][x].visited is False:
+            neighbour.append(self.maze.grid[y - 1][x])
+        if (x + 1 < self.maze.width and
+           self.maze.grid[y][x + 1].visited is False):
+            neighbour.append(self.maze.grid[y][x + 1])
+        if x - 1 >= 0 and self.maze.grid[y][x - 1].visited is False:
+            neighbour.append(self.maze.grid[y][x - 1])
+        return neighbour
 
-    def generate(self) -> None:
-        """Generate the maze structure in place.
+    def def_direction(self, cell1: Cell, cell2: Cell) -> None:
+        x3 = cell1.get_coord('x') - cell2.get_coord('x')
+        y3 = cell1.get_coord('y') - cell2.get_coord('y')
+        if x3 > 0:
+            cell1.break_wall("west")
+            cell2.break_wall("east")
+        elif x3 < 0:
+            cell1.break_wall("east")
+            cell2.break_wall("west")
+        elif y3 > 0:
+            cell1.break_wall("north")
+            cell2.break_wall("south")
+        else:
+            cell1.break_wall("south")
+            cell2.break_wall("north")
 
-        This method starts from the entry cell, carves passages recursively,
-        and optionally adds extra openings when the maze is not required to be
-        perfect.
+    def generate(self, perfect: bool = True,
+                 renderer: MazeRenderer | None = None,
+                 index: int = 0) -> None:
+        stack: list[Cell] = []
+        stack.append(self.maze.grid[0][0])
+        self.maze.grid[0][0].set_visit()
+        if self.maze.width > 8 and self.maze.height > 7:
+            pat_42 = self.maze.pattern_42()
+            for cell in pat_42:
+                cell.set_visit()
+        else:
+            print("Warning: Maze too small to render the '42' pattern")
+        while (len(stack) != 0):
+            neighbour = self.check_neighbour(stack[-1])
+            if len(neighbour) != 0:
+                next_cell = random.choice(neighbour)
+                self.def_direction(stack[-1], next_cell)
+                next_cell.set_visit()
+                stack.append(next_cell)
 
-        Protected cells are excluded from carving so the "42" pattern remains
-        fully closed and visible.
-        """
-        visited = [[False] * self.maze.width for _ in range(self.maze.height)]
-        for (x, y) in self._protected_cells:
-            visited[y][x] = True
-
-        self._carve_passages(self.maze.entry[0], self.maze.entry[1], visited)
-
-        if not self.maze.perfect:
-            self._add_extra_passages()
-
-    def _carve_passages(self,
-                        x: int,
-                        y: int,
-                        visited: List[List[bool]]) -> None:
-        """Recursively carve passages using randomized depth-first search.
-
-        Args:
-            x: X coordinate of the current cell.
-            y: Y coordinate of the current cell.
-            visited: 2D matrix tracking which cells have already been visited.
-
-        A passage is only kept if it does not violate the subject rule that
-        forbids large open areas. Protected cells are never opened.
-        """
-        visited[y][x] = True
-        dirs = ['N', 'E', 'S', 'W']
-        random.shuffle(dirs)
-
-        for direction in dirs:
-            neighbor = self.maze.get_neighbors_in_direction(x, y, direction)
-            if neighbor is None:
-                continue
-            nx, ny = neighbor
-            if visited[ny][nx]:
-                continue
-            if (nx, ny) in self._protected_cells:
-                continue
-
-            # Remove wall
-            self.maze.remove_wall_between((x, y), (nx, ny))
-
-            if self.maze.has_no_large_openings():
-                self._carve_passages(nx, ny, visited)
+                if renderer:
+                    os.system('clear')
+                    renderer.display(False, index)
+                    time.sleep(0.01)
             else:
-                self.maze.add_wall_between((x, y), (nx, ny))
+                stack.pop()
 
-    def _add_extra_passages(self) -> None:
-        """Open additional walls to create a non-perfect maze.
+        if perfect is False:
+            self.make_imperfect()
 
-        This method selects candidate internal walls between non-protected
-        neighboring cells and removes some of them to introduce multiple paths.
-        """
+    def _is_3x3_open(self, start_x: int, start_y: int,
+                     c1: Cell, c2: Cell) -> bool:
+        """Vérifie si une zone 3x3 spécifique est totalement ouverte"""
+        for dy in range(3):
+            for dx in range(3):
+                cx = start_x + dx
+                cy = start_y + dy
+                c = self.maze.get_cell(cx, cy)
 
-        walls: List[Tuple[Tuple[int, int], Tuple[int, int]]] = []
+                if dx < 2:
+                    c_east = self.maze.get_cell(cx + 1, cy)
+                    is_the_broken_wall = ((c == c1 and c_east == c2) or
+                                          (c == c2 and c_east == c1))
+                    if not is_the_broken_wall and c.get_direction("east") == 1:
+                        return False
+
+                if dy < 2:
+                    c_south = self.maze.get_cell(cx, cy + 1)
+                    is_the_broken_wall = ((c == c1 and c_south == c2) or
+                                          (c == c2 and c_south == c1))
+                    if (not is_the_broken_wall
+                       and c.get_direction("south") == 1):
+                        return False
+        return True
+
+    def _would_form_3x3(self, c1: Cell, c2: Cell) -> bool:
+        'Vérifie si casser le mur entre c1 et '
+        'c2 créerait une zone ouverte de 3x3'
+        x1, y1 = c1.get_coord('x'), c1.get_coord('y')
+        x2, y2 = c2.get_coord('x'), c2.get_coord('y')
+
+        min_x = max(0, min(x1, x2) - 2)
+        max_x = min(self.maze.width - 3, max(x1, x2))
+        min_y = max(0, min(y1, y2) - 2)
+        max_y = min(self.maze.height - 3, max(y1, y2))
+
+        for y in range(min_y, max_y + 1):
+            for x in range(min_x, max_x + 1):
+                if self._is_3x3_open(x, y, c1, c2):
+                    return True
+        return False
+
+    def make_imperfect(self) -> None:
+        'Logique du Projet 1 : casse environ 20% des murs restants au hasard'
+        pat_42 = []
+        if self.maze.width > 8 and self.maze.height > 7:
+            pat_42 = self.maze.pattern_42()
+
+        walls_to_break: list[tuple[Cell, Cell]] = []
 
         for y in range(self.maze.height):
             for x in range(self.maze.width):
-                if (x, y) in self._protected_cells:
+                current = self.maze.get_cell(x, y)
+
+                if current in pat_42:
                     continue
 
-                for direction in ['E', 'S']:
-                    neighbor = self.maze\
-                                .get_neighbors_in_direction(x, y, direction)
-                    if neighbor is None:
-                        continue
-                    if neighbor in self._protected_cells:
-                        continue
-                    if self.maze.get_cell(x, y).has_wall(direction):
-                        walls.append(((x, y), neighbor))
+                if x + 1 < self.maze.width:
+                    east_neighbor = self.maze.get_cell(x + 1, y)
+                    if (east_neighbor not in pat_42
+                       and current.get_direction("east") == 1):
+                        walls_to_break.append((current, east_neighbor))
 
-        if not walls:
+                if y + 1 < self.maze.height:
+                    south_neighbor = self.maze.get_cell(x, y + 1)
+                    if (south_neighbor not in pat_42 and
+                       current.get_direction("south") == 1):
+                        walls_to_break.append((current, south_neighbor))
+
+        if not walls_to_break:
             return
 
-        random.shuffle(walls)
-        num_to_open = max(1, len(walls) // 5)
-
+        random.shuffle(walls_to_break)
+        num_to_open = max(1, len(walls_to_break) // 5)
         opened = 0
-        for c1, c2 in walls:
+
+        for c1, c2 in walls_to_break:
             if opened >= num_to_open:
                 break
 
-            self.maze.remove_wall_between(c1, c2)
-
-            if self.maze.has_no_large_openings():
+            if not self._would_form_3x3(c1, c2):
+                self.def_direction(c1, c2)
                 opened += 1
-            else:
-                self.maze.add_wall_between(c1, c2)
-
-
-if __name__ == '__main__':
-    parser = Parsing("config.txt")
-    parser.parse()
-    maze = Maze(parser)
-    maze.apply_42_pattern()
-    generator = MazeGenerator(maze)
-    generator.generate()
-    output = maze.to_hex_output()
-    # print(generator._protected_cells)
-    print(generator.maze)
-    print(output)

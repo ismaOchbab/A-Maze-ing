@@ -75,7 +75,7 @@ class Parsing:
 
         try:
             self.width = int(raw_config['width'])
-            if self.width <= 0 or self.width > 50:
+            if self.width < 0 or self.width > 50:
                 raise ValueError
         except ValueError:
             raise ConfigError(
@@ -83,7 +83,7 @@ class Parsing:
 
         try:
             self.height = int(raw_config['height'])
-            if self.height <= 0 or self.height > 50:
+            if self.height < 0 or self.height > 50:
                 raise ValueError
         except ValueError:
             raise ConfigError(
@@ -144,7 +144,7 @@ class Parsing:
                       if k not in standard_keys}
 
 
-def main() -> None:
+def main():
     if len(sys.argv) != 2:
         print("Usage: python3 parser.py config.txt")
         sys.exit(1)
