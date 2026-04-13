@@ -169,10 +169,12 @@ class MazeRenderer:
         print("=" * 50)
 
     def regenerate(self):
-        """Generate a new maze with same config."""
-        # Re-create maze and generator
+        """
+        Generate a new maze with same config.
+        Re-create maze and generator
+        """
         new_maze = Maze(self.config)
-        new_maze.seed = random.randrange(50)
+        # new_maze.seed = random.randrange(50)
         new_maze.apply_42_pattern()
         new_gen = MazeGenerator(new_maze)
         new_gen.generate()
@@ -184,7 +186,7 @@ class MazeRenderer:
         self._path_cells = None
 
     def run(self):
-        """Start interactive display loop."""
+        """Start interactive display loop"""
         self.clear_screen()
         while True:
             print(self.render())

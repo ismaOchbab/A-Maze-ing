@@ -123,6 +123,8 @@ if __name__ == "__main__":
         generator = MazeGenerator(maze)
         generator.generate()
 
+        write_output_file(maze, parser.output_file)
+
         renderer = MazeRenderer(generator.maze, generator, parser)
         renderer.run()
     except Exception as e:

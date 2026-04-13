@@ -71,5 +71,5 @@ class Cell:
     def get_hex_value(obj: Self) -> str:
         """ Returns the hex value of the current cell
         Order Ordre: W, S, E, N (bits 3,2,1,0)"""
-        bin_str = f"{obj.N}{obj.E}{obj.S}{obj.W}"
+        bin_str = f"{obj.W}{obj.S}{obj.E}{obj.N}"
         return hex(int(bin_str, 2))[2:].upper()

@@ -1,19 +1,19 @@
 # Dimensions
 WIDTH=20
-HEIGHT=15
+HEIGHT=10
 
 # Entry/Exit coords
 ENTRY=0,1
-EXIT=19,13
+EXIT=19,8
 
 # Maze output file path, should not contain spaces
 OUTPUT_FILE=maze.txt
 
 # Enable/disable perfect maze
-PERFECT=false
+PERFECT=no
 
 # Seed-based generation
-SEED=1
+SEED=42
 
 # Show/Hide the shortest path
 SHOW_PATH=false
