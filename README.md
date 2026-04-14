@@ -4,7 +4,7 @@
 
 ## Description
 
-**A-Maze-ing** is a Python maze generator and terminal visualizer built for the 42 curriculum. The program reads a configuration file, generates a valid maze, writes it to an output file using the required hexadecimal wall encoding, computes the shortest path between the entry and exit, and provides an interactive terminal rendering of the result. The maze also tries to embed a visible **"42" pattern** made of fully closed protected cells when the maze size allows it.
+**A-Maze-ing** is a Python maze generator and terminal visualizer built for the 42 curriculum. The program reads a configuration file, generates a valid maze, writes it to an output file using the required hexadecimal wall encoding, computes the shortest path between the entry and exit, and provides an interactive terminal rendering of the result. The maze also tries to embed a visible **"42" pattern** made of fully closed protected cells when the maze size or the entry/exit coordinates allows it.
 
 The project is organized around reusable core classes:
 - `Cell`: represents one maze cell and its four walls.
@@ -44,8 +44,8 @@ The project is organized around reusable core classes:
 The program starts by reading a text configuration file with one `KEY=VALUE` pair per line. Empty lines and lines beginning with `#` are ignored. The parser validates all mandatory fields and raises a clear `ConfigError` when a value is missing or invalid. The current implementation enforces:
 - `WIDTH` and `HEIGHT` as integers
 - `ENTRY` and `EXIT` inside maze bounds
-- different entry and exit coordinates
 - `PERFECT` as a boolean-like value
+- `OUTPUT_FILE` path to the output file as a string
 - optional `SEED` as an integer
 - any unknown keys are stored in `extra` for later use
 
@@ -168,19 +168,34 @@ A closed wall is encoded as `1`, and an open wall as `0`. In the code, the cell 
 ### Example structure
 
 ```text
-<hex row 1>
-<hex row 2>
-...
-<hex row n>
+D3955155153939151153
+90295693856AAAC5043A
+8282916C6B94445503AE
+C286843F946FFF93AAC3
+BC29452FC5157F842ABA
+810453AFFFAFFFAD6AAA
+AEC3946D3FAFD529146A
+817AC5112FEFFF844152
+A83853EAC39113C51416
+C4445456D46C6C556D47
 
-entry_x, entry_y
-exit_x, exit_y
-NESSEW...
+0,1
+19,8
+EESSSSEEESWSEEEESESENEEESEEENEEE
 ```
 
 ## Visual representation
-
 The subject requires a visual display that shows walls, entry, exit, and the solution path. This project uses a **terminal ASCII renderer** with ANSI colors. The renderer displays:
+
+### Main Visualizer
+
+- `` for the entry,
+- `` for the exit,
+- `` for protected cells of the 42 pattern,
+- `` for cells belonging to the shortest path when enabled.
+
+### Bonus Visualizer
+
 - `E` for the entry,
 - `X` for the exit,
 - `█` for protected cells of the 42 pattern,
@@ -190,6 +205,7 @@ The subject requires a visual display that shows walls, entry, exit, and the sol
 
 The current renderer supports the following keys:
 
+#### Bonus Visualizer
 | Key | Action |
 |---|---|
 | `r` | Regenerate a new maze |

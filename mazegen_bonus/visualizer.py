@@ -197,6 +197,8 @@ class MazeRenderer:
         """Start interactive display loop"""
         self.clear_screen()
         while True:
+            if self.maze.width <= 8 or self.maze.height <= 7:
+                print("\nWarning: Maze too small to render the '42' pattern\n")
             print(self.render())
             self.show_help()
             key = input("> ").strip().lower()

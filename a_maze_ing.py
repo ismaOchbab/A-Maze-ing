@@ -58,6 +58,8 @@ def main() -> None:
             os.system('clear')
             renderer.display(show_path, i)
             maze.hexa_output()
+            if maze.width <= 8 or maze.height <= 7:
+                print("\nWarning: Maze too small to render the '42' pattern\n")
 
             choice = input("""\n=== A-Maze-ing ===
 1. Re-generate a new maze

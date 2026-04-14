@@ -75,19 +75,19 @@ class Parsing:
 
         try:
             self.width = int(raw_config['width'])
-            if self.width <= 0 or self.width > 50:
+            if self.width < 2 or self.width > 50:
                 raise ValueError
         except ValueError:
             raise ConfigError(
-                "WIDTH must be an integer and 0 < width < 50")
+                "WIDTH must be an integer and 2 <= width < 50")
 
         try:
             self.height = int(raw_config['height'])
-            if self.height <= 0 or self.height > 50:
+            if self.height < 2 or self.height > 50:
                 raise ValueError
         except ValueError:
             raise ConfigError(
-                    "HEIGHT must be an int and 0 < height < 50"
+                    "HEIGHT must be an int and 2 <= height < 50"
                 )
 
         try:

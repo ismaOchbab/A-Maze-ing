@@ -55,7 +55,7 @@ class MazeGenerator:
             for cell in pat_42:
                 cell.set_visit()
         else:
-            print("Warning: Maze too small to render the '42' pattern")
+            print("Warning: Maze too small to render the '42' pattern\n")
         while (len(stack) != 0):
             neighbour = self.check_neighbour(stack[-1])
             if len(neighbour) != 0:
