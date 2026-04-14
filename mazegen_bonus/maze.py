@@ -99,6 +99,10 @@ class Maze:
     def add_wall_between(self,
                          cell1: Tuple[int, int],
                          cell2: Tuple[int, int]) -> None:
+        """
+        adds the wall between two adjacent cells (both direction)
+        Assumes cell1 and cell2 are neighbors
+        """
         x1, y1 = cell1
         x2, y2 = cell2
 
@@ -309,7 +313,7 @@ class Maze:
                            end: Tuple[int, int]) -> str:
         """
         returns shortest path from start to end as a string of moves (N,E,S,W)
-        uses BFS. returns empty string if start == end
+        uses BFS (Breadth-First Search). returns empty string if start == end
         """
         if start == end:
             return ""

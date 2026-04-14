@@ -84,7 +84,6 @@ class MazeGenerator:
             if (nx, ny) in self._protected_cells:
                 continue
 
-            # Remove wall
             self.maze.remove_wall_between((x, y), (nx, ny))
 
             if self.maze.has_no_large_openings():

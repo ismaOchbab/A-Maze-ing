@@ -28,13 +28,23 @@ The project is organized around reusable core classes:
 
 ```text
 .
-├── a_maze_ing.py      # Main entry point
-├── parser.py          # Configuration parser and validation
-├── cell.py            # Cell model and wall encoding
-├── maze.py            # Maze structure, validation, path-finding, output
-├── maze_generator.py  # Maze generation algorithm
-├── visualizer.py      # Terminal renderer and interactive controls
-└── README.md
+├── a_maze_ing.py         # Main entry point
+├── Makefile
+├── README.md
+├── mazegen/              # reusable package modules
+│   ├── __init__.py
+│   ├── cell.py
+│   ├── maze.py
+|   ├── parser.py
+|   ├── maze_generator.py
+│   └── visualizer.py
+└── mazegen_bonus/        # bonus reusable package modules
+│   ├── __init__.py
+│   ├── cell.py
+│   ├── maze.py
+|   ├── parser.py
+|   ├── maze_generator.py
+│   └── visualizer.py
 ```
 
 ## How it works
@@ -217,15 +227,47 @@ These controls are implemented in the interactive loop of `MazeRenderer.run()`.
 
 ## Instructions
 
-The main program must be launched with a configuration file:
+The main program must be launched with a configuration file.
 
+Two ways of launching:
+
+### Without a Makefile
 ```bash
-python3 a_maze_ing.py config.txt
+python3 a_maze_ing.py <configuration_file_path>
 ```
 
-This is also the command specified by the subject.
+### With a Makefile
 
-If your repository includes a `Makefile`, the subject expects common targets such as `install`, `run`, `debug`, `clean`, `lint`, and optionally `lint-strict`.
+You will need to have Make, UV and python installed on your pc.
+
+To install the venv and dependencies, use:
+
+```bash
+make install
+make build
+```
+
+To run the program, use :
+
+```bash
+uv run python3 a_maze_ing.py <configuration_file_path>
+```
+or
+
+```bash
+make run
+```
+
+#### Make commands
+|Utility|Command|
+|---|---|
+|Installation|```make install```|
+|Running program|```make run```|
+|Check norm|```make lint-strict```|
+|Remove uselss files|```make clean```|
+|Remove uselss files and reinstall|```make re```|
+|Build package|```make build```|
+|Debug (CLI)|```make debug```|
 
 ## Reusable code
 
@@ -359,11 +401,7 @@ That matches the intent described in the original README draft and stays aligned
 - Maze generation overview on Wikipedia
 - 42 subject PDF for A-Maze-ing
 
-Useful references already cited in the original draft:
+Useful references:
 - https://www.jamisbuck.org/presentations/rubyconf2011/index.html#recursive-backtracker-demo
 - https://en.wikipedia.org/wiki/Maze_generation_algorithm/
 - http://jamescherti.com/python-flushing-stdin-before-using-input-function/
-
-## Final notes
-
-This project satisfies the core goals of the subject: parsing a config file, generating a valid maze, embedding a 42 pattern when possible, computing the shortest path, exporting the maze in hexadecimal format, and providing a visual interactive rendering. The current codebase is also structured in a way that makes the maze logic reusable in future projects.
