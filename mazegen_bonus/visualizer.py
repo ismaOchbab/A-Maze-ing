@@ -2,7 +2,6 @@
 
 import os
 import time
-import random
 from typing import List, Tuple, Optional
 
 from .maze import Maze
@@ -114,15 +113,20 @@ class MazeRenderer:
 
     def _render_wall_horizontal(self, y: int) -> str:
         """Return the horizontal wall line above row y."""
+        # theme = self.THEMES[self.theme_idx]
+        # wall_color = theme[0]
         line = "+"
         for x in range(self.maze.width):
             cell = self.maze.get_cell(x, y)
             line += "---" if cell.has_wall('N') else "   "
             line += "+"
+        # return f"{self._color(wall_color)}{line}{self._color('reset')}"
         return line
 
     def _render_wall_vertical(self, y: int) -> str:
-        """Return the vertical wall line for row y (cells + east walls)."""
+        """Return the vertical wall line for row y (cells + east walls)"""
+        # theme = self.THEMES[self.theme_idx]
+        # wall_color = theme[0]
         line = ""
         for x in range(self.maze.width):
             cell = self.maze.get_cell(x, y)
@@ -131,10 +135,13 @@ class MazeRenderer:
         # Last east wall
         last_cell = self.maze.get_cell(self.maze.width - 1, y)
         line += "|" if last_cell.has_wall('E') else " "
+        # return f"{self._color(wall_color)}{line}{self._color('reset')}"
         return line
 
     def render(self) -> str:
-        """Return the full ASCII representation of the maze with colors."""
+        """Return the full ASCII representation of the maze with colors"""
+        # theme = self.THEMES[self.theme_idx]
+        # wall_color = theme[0]
         lines = []
         # Top border
         lines.append(self._render_wall_horizontal(0))
@@ -152,13 +159,14 @@ class MazeRenderer:
                     bottom += "---" if cell.has_wall('S') else "   "
                     bottom += "+"
                 lines.append(bottom)
+
         return "\n".join(lines)
 
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         """Clear terminal screen."""
         os.system('clear' if os.name == 'posix' else 'cls')
 
-    def show_help(self):
+    def show_help(self) -> None:
         """Display interactive commands."""
         print("\n" + "=" * 50)
         print("Commands:")
@@ -168,7 +176,7 @@ class MazeRenderer:
         print("  q - Quit")
         print("=" * 50)
 
-    def regenerate(self):
+    def regenerate(self) -> None:
         """
         Generate a new maze with same config.
         Re-create maze and generator
@@ -185,7 +193,7 @@ class MazeRenderer:
         self.generator = new_gen
         self._path_cells = None
 
-    def run(self):
+    def run(self) -> None:
         """Start interactive display loop"""
         self.clear_screen()
         while True:
@@ -217,7 +225,6 @@ if __name__ == '__main__':
         maze = Maze(parser)
         maze.apply_42_pattern()
 
-        from maze_generator import MazeGenerator
         generator = MazeGenerator(maze)
         generator.generate()
 

@@ -18,20 +18,22 @@ def ask_choice() -> int:
             "Make your choice:\n"
             "1- Main Generator\n"
             "2- Bonus Generator\n"
+            "3- Quit this menu\n"
         ).strip()
 
-        if choice in ("1", "2"):
+        if choice in ('1', '2', '3'):
             return int(choice)
 
-        print("Invalid choice. Enter 1 or 2.")
+        print("Invalid choice. Enter 1 or 2 or 3")
+
 
 def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python3 a_maze_ing.py config.txt")
         sys.exit(1)
 
-    choice = ask_choice()
-    if choice == 1:
+    answer = ask_choice()
+    if answer == 1:
         parser = Parsing(sys.argv[1])
         try:
             parser.parse()
@@ -39,7 +41,10 @@ def main() -> None:
             print(f"Configuration error: {e}")
             sys.exit(1)
 
-        maze = Maze(parser.width, parser.height, parser.output_file, parser.entry,
+        maze = Maze(parser.width,
+                    parser.height,
+                    parser.output_file,
+                    parser.entry,
                     parser.exit)
         generator = MazeGenerator(maze, parser.seed)
         renderer = MazeRenderer(maze)
@@ -54,12 +59,14 @@ def main() -> None:
             renderer.display(show_path, i)
             maze.hexa_output()
 
-            choice = input("\n=== A-Maze-ing ===\n1. Re-generate a new maze\n2. "
-                        "Show/Hide path from entry to exit\n3. "
-                        "Rotate maze colors\n4. "
-                        "Export maze in .svg\n5. "
-                        "Show/Hide maze animation\n6. "
-                        "Quit\nChoice? (1-6): ")
+            choice = input("""\n=== A-Maze-ing ===
+1. Re-generate a new maze
+2. Show/Hide path from entry to exit
+3. Rotate maze colors
+4. Export maze in .svg
+5. Show/Hide maze animation
+6. Quit
+Choice? (1-6): """)
             if choice == '1':
                 # On recrée les objets pour relancer une génération fraîche
                 maze = Maze(parser.width, parser.height, parser.output_file,
@@ -88,27 +95,29 @@ def main() -> None:
                     rend = True
             if choice == '6':
                 break
-    elif choice == 2:
+    elif answer == 2:
         try:
-            parser = Parsing2(sys.argv[1])
-            parser.parse()
-            maze = Maze2(parser)
-            maze.apply_42_pattern()
+            parser2 = Parsing2(sys.argv[1])
+            parser2.parse()
+            maze2 = Maze2(parser2)
+            maze2.apply_42_pattern()
 
-            generator = MazeGenerator2(maze)
-            generator.generate()
+            generator2 = MazeGenerator2(maze2)
+            generator2.generate()
 
-            renderer = MazeRenderer2(generator.maze, generator, parser)
-            renderer.run()
+            renderer2 = MazeRenderer2(generator2.maze, generator2, parser2)
+            renderer2.run()
         except Exception as e:
             print(
                 f"Caught an error: {e}"
             )
             exit()
     else:
-        print("WRONG choice ! Exiting..")
+        print("Exiting..")
         exit()
+    return None
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # sys.exit(main())
+    main()

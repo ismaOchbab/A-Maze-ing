@@ -2,9 +2,7 @@
 name = "mazegen"
 version = "1.0.0"
 requires-python = ">=3.10"
-
-[project.optional-dependencies]
-dev = ["flake8", "mypy"]
+dependencies = ["flake8", "mypy"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

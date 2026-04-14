@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This script does not check for errors or malformed files.
 # It only validates that neighbooring cells sharing a wall have
 #  both the correct encoding.

@@ -325,7 +325,6 @@ The original README draft mentions the following tools:
 | `uv` | dependency and project management |
 | `flake8` | style checking |
 | `mypy` | static type checking |
-| `pydantic` | parsing / validation |
 
 However, in the uploaded Python files, the current implementation uses standard `sys.argv` parsing and does not directly show `argparse`, `pynput`, or `pydantic`. Those tools should only remain documented here if they are present elsewhere in the full repository.
 

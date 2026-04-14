@@ -144,7 +144,7 @@ class Parsing:
                       if k not in standard_keys}
 
 
-def main():
+def main() -> None:
     if len(sys.argv) != 2:
         print("Usage: python3 parser.py config.txt")
         sys.exit(1)

@@ -43,7 +43,7 @@ debug:
 	@$(UV) run $(PYTHON) -m pdb $(MAIN) $(CONFIG)
 
 flake8:
-	@$(UV) run flake8 .
+	@$(UV) run flake8 --exclude .venv
 
 mypy:
 	@$(UV) run mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
@@ -59,6 +59,7 @@ clean:
 	@rm -rf __pycache__ .mypy_cache .pytest_cache dist build *.egg-info .venv
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@rm uv.lock
 
 re: clean install
 

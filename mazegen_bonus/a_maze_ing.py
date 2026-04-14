@@ -132,4 +132,3 @@ if __name__ == "__main__":
             f"Caught an error: {e}"
         )
         exit()
-    

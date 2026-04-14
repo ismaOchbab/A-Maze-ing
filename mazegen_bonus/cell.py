@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Self
+from typing import Self, Any
 
 
 class CellDirectionException(Exception):
@@ -16,6 +16,8 @@ class Cell:
                  W: int = 1) -> None:
         """
         initializes the cell with all borders set to 1 (closed cell)
+        initializes the cell as non protected
+        Raises CellDirectionError if the value is not 0 or 1
         """
         if not all(obj.validate_direction(d)
                    for d in (N, E, S, W)):
@@ -29,12 +31,22 @@ class Cell:
 
     @staticmethod
     def validate_direction(direction: int) -> bool:
+        """
+        Checks if direction value is 0 or 1
+        Returns False if not
+        """
         return direction in (0, 1)
 
-    def has_wall(obj: Self, direction: str) -> bool:
-        return getattr(obj, f"{direction}") == 1
+    def has_wall(obj: Self, direction: str) -> Any:
+        """Returns True if the given direction is set to 1"""
+        return (getattr(obj, f"{direction}") == 1)
 
     def remove_wall(obj: Self, direction: str) -> None:
+        """
+        Checks if the direction is N, E, S or W
+        then sets its value to 0
+        raises CellDirectionError if the direction is incorrect
+        """
         if direction in ('N', 'E', 'S', 'W'):
             setattr(obj, f"{direction}", 0)
         else:
@@ -42,6 +54,11 @@ class Cell:
                 f"Invalid direction {direction}")
 
     def add_wall(obj: Self, direction: str) -> None:
+        """
+        Checks if the direction is N, E, S or W
+        then sets its value to 1
+        raises CellDirectionError if the direction is incorrect
+        """
         if direction in ('N', 'E', 'S', 'W'):
             setattr(obj, f"{direction}", 1)
         else:
@@ -49,6 +66,9 @@ class Cell:
                 f"Invalid direction {direction}")
 
     def directions(obj: Self) -> dict[str, int]:
+        """
+        Returns the values of each direction of the cell as a dict
+        """
         return {
             'N': obj.N,
             'E': obj.E,
@@ -57,6 +77,11 @@ class Cell:
         }
 
     def set_direction(obj: Self, direction: str, value: int) -> None:
+        """
+        Checks if the direction is N, E, S or W
+        then sets its value to the given value
+        raises CellDirectionError if the direction or the value is incorrect
+        """
         if not obj.validate_direction(value):
             raise CellDirectionException(
                 f"Invalid direction value : {value}"
@@ -69,7 +94,9 @@ class Cell:
             )
 
     def get_hex_value(obj: Self) -> str:
-        """ Returns the hex value of the current cell
-        Order Ordre: W, S, E, N (bits 3,2,1,0)"""
+        """
+        Returns the hex value of the current cell
+        Order Ordre: W, S, E, N (bits 3,2,1,0)
+        """
         bin_str = f"{obj.W}{obj.S}{obj.E}{obj.N}"
         return hex(int(bin_str, 2))[2:].upper()
