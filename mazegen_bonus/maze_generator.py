@@ -25,8 +25,8 @@ class MazeGenerator:
         generation reproducible.
         """
         self.maze = maze
-        # if maze.seed is not None:
-        #     random.seed(maze.seed)
+        if maze.seed is not None:
+            random.seed(maze.seed)
 
         # Mark protected cells (all walls = 1, check individual walls)
         self._protected_cells: Set[Tuple[int, int]] = set()

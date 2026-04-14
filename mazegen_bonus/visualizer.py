@@ -182,7 +182,7 @@ class MazeRenderer:
         Re-create maze and generator
         """
         new_maze = Maze(self.config)
-        # new_maze.seed = random.randrange(50)
+        new_maze.seed = self.maze.seed
         new_maze.apply_42_pattern()
         new_gen = MazeGenerator(new_maze)
         new_gen.generate()
