@@ -28,7 +28,6 @@ class MazeGenerator:
         if maze.seed is not None:
             random.seed(maze.seed)
 
-        # Mark protected cells (all walls = 1, check individual walls)
         self._protected_cells: Set[Tuple[int, int]] = set()
         for y in range(maze.height):
             for x in range(maze.width):
@@ -94,7 +93,7 @@ class MazeGenerator:
     def _add_extra_passages(self) -> None:
         """Open additional walls to create a non-perfect maze.
 
-        This method selects candidate internal walls between non-protected
+        This method selects 20% candidate internal walls between non-protected
         neighboring cells and removes some of them to introduce multiple paths.
         """
 

@@ -46,6 +46,9 @@ class MazeRenderer:
     ]
 
     def __init__(self, maze: Maze, generator: MazeGenerator, config: Parsing):
+        """Initializes the renderer object with:
+        a valid maze generated from a valid config parser
+        and pass it to a mazegenerator"""
         self.maze = maze
         self.generator = generator
         self.config = config
@@ -89,7 +92,6 @@ class MazeRenderer:
         theme = self.THEMES[self.theme_idx]
         wall_color, path_color, entry_color, exit_color, pattern_color = theme
 
-        # Determine content
         if (x, y) == self.maze.entry:
             content = 'E'
             color = entry_color
@@ -97,36 +99,32 @@ class MazeRenderer:
             content = 'X'
             color = exit_color
         elif cell.protected:
-            content = '█'  # solid block for "42" pattern
+            content = '█'
             color = pattern_color
         else:
-            content = ' '  # empty space for open cell
+            content = ' '
             color = 'reset'
 
             if self.show_path and (x, y) in self._get_path_cells():
                 color = path_color
                 content = '●'
 
-        # Build the cell display (3 characters wide for spacing)
+        # Build the cell display: 3 characters wide for spacing
         colored = f"{self._color(color)}{content}{self._color('reset')}"
         return f" {colored} "
 
     def _render_wall_horizontal(self, y: int) -> str:
         """Return the horizontal wall line above row y."""
-        # theme = self.THEMES[self.theme_idx]
-        # wall_color = theme[0]
         line = "+"
         for x in range(self.maze.width):
             cell = self.maze.get_cell(x, y)
             line += "---" if cell.has_wall('N') else "   "
             line += "+"
-        # return f"{self._color(wall_color)}{line}{self._color('reset')}"
+
         return line
 
     def _render_wall_vertical(self, y: int) -> str:
         """Return the vertical wall line for row y (cells + east walls)"""
-        # theme = self.THEMES[self.theme_idx]
-        # wall_color = theme[0]
         line = ""
         for x in range(self.maze.width):
             cell = self.maze.get_cell(x, y)
@@ -135,13 +133,11 @@ class MazeRenderer:
         # Last east wall
         last_cell = self.maze.get_cell(self.maze.width - 1, y)
         line += "|" if last_cell.has_wall('E') else " "
-        # return f"{self._color(wall_color)}{line}{self._color('reset')}"
+
         return line
 
     def render(self) -> str:
         """Return the full ASCII representation of the maze with colors"""
-        # theme = self.THEMES[self.theme_idx]
-        # wall_color = theme[0]
         lines = []
         # Top border
         lines.append(self._render_wall_horizontal(0))
@@ -167,7 +163,7 @@ class MazeRenderer:
         os.system('clear' if os.name == 'posix' else 'cls')
 
     def show_help(self) -> None:
-        """Display interactive commands."""
+        """Display interactive commands"""
         print("\n" + "=" * 50)
         print("Commands:")
         print("  r - Regenerate maze")
