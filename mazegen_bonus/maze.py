@@ -142,7 +142,11 @@ class Maze:
 
     def is_fully_connected(self) -> bool:
         """
-        Checks if all cells are reachable from the entry
+        Checks if all cells are reachable from the entry.
+        Verify all non-protected cells are reachable
+        from the entry point using BFS.
+        Returns False if maze is empty,
+        entry or exit is protected, or any cell is isolated.
         """
         if self.width == 0 or self.height == 0:
             return False
@@ -191,7 +195,10 @@ class Maze:
 
     def walls_coherence(self) -> bool:
         """
-        checks that neighboring cells have matching walls
+        checks that neighboring cells have matching walls.
+        Verify walls are consistent between adjacent cells.
+        Returns False if any two neighboring cells have mismatched walls
+        (e.g., cell's east wall doesn't match neighbor's west wall).
         """
         for y in range(self.height):
             for x in range(self.width):
@@ -242,7 +249,7 @@ class Maze:
     # validates all the checks funcs
     def validate(self) -> bool:
         """
-        Subject-level validation.
+        validation of all the above checks
         """
         if not self._border_walls_valid():
             return False
@@ -256,11 +263,11 @@ class Maze:
             return self.entry == self.exit
         return True
 
-    # 42 pattern (to be called by the generator)
     def apply_42_pattern(self) -> bool:
         """
         Draw the visible '42' as protected fully-closed cells.
-        Returns False if the maze is too small.
+        Returns False if the maze is too small
+        or if the entry/exit overlaps the pattern
         """
         pattern_4 = [
             [1, 0, 1],
@@ -277,7 +284,6 @@ class Maze:
             [1, 1, 1],
         ]
 
-        # width = 3 + 1 gap + 3 = 7
         if self.width < 7 or self.height < 5:
             print("Warning: maze too small to place the '42' pattern.")
             return False
@@ -373,6 +379,9 @@ class Maze:
         """
         ASCII representation of the maze
         E = entry, X = exit
+        closed cell = +---+
+                      |   |
+                      +---+
         """
         if self.width == 0 or self.height == 0:
             return ""

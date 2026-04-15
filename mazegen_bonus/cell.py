@@ -8,7 +8,7 @@ class CellDirectionException(Exception):
 
 
 class Cell:
-    "Represents a single maze cell with walls on 4 sides"
+    """Represents a single maze cell with walls on 4 sides"""
     def __init__(obj: Self,
                  N: int = 1,
                  E: int = 1,

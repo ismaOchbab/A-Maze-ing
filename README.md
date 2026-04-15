@@ -308,7 +308,6 @@ print(maze.find_shortest_path(maze.entry, maze.exit))
 - the output serializer,
 - the terminal renderer if a CLI display is needed.
 
-> Note: the uploaded files clearly show reusable modules, but they do not include the packaging metadata files needed to document an actual installable `mazegen-*` package. If those files exist elsewhere in the repository, this section can be extended with packaging instructions.
 
 ## Error handling
 
