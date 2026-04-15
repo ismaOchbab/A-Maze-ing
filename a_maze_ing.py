@@ -2,10 +2,7 @@
 
 import os
 import sys
-from mazegen.maze import Maze
-from mazegen.maze_generator import MazeGenerator
-from mazegen.visualizer import MazeRenderer
-from mazegen.parser import Parsing, ConfigError
+from mazegen import Maze, MazeGenerator, MazeRenderer, Parsing, ConfigError
 from mazegen_bonus.maze import Maze as Maze2
 from mazegen_bonus.maze_generator import MazeGenerator as MazeGenerator2
 from mazegen_bonus.visualizer import MazeRenderer as MazeRenderer2

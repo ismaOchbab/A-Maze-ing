@@ -7,12 +7,39 @@ import time
 
 
 class MazeGenerator:
+    """
+    Generates a maze using the depth-first search (DFS) algorithm.
+
+    This class implements maze generation with optional perfect
+    or imperfect maze modes.
+    It can display the generation process in real-time and supports
+    seeded random generation
+    for reproducible results.
+    """
+
     def __init__(self, maze: Maze, seed: int | None = None):
+        """
+        Initialize the MazeGenerator.
+
+        Args:
+            maze: The Maze object to generate.
+            seed: Optional seed for random number generator. If provided,
+            ensures reproducible maze generation.
+        """
         self.maze = maze
         if seed is not None:
             random.seed(seed)
 
     def check_neighbour(self, cell: Cell) -> list[Cell]:
+        """
+        Get all unvisited neighboring cells.
+
+        Args:
+            cell: The cell to check neighbors for.
+
+        Returns:
+            A list of unvisited neighboring cells (north, south, east, west).
+        """
         x = cell.get_coord('x')
         y = cell.get_coord('y')
         neighbour: list[Cell] = []
@@ -29,6 +56,14 @@ class MazeGenerator:
         return neighbour
 
     def def_direction(self, cell1: Cell, cell2: Cell) -> None:
+        """
+        Break the wall between two adjacent cells based
+        on their relative positions.
+
+        Args:
+            cell1: The first cell.
+            cell2: The second cell.
+        """
         x3 = cell1.get_coord('x') - cell2.get_coord('x')
         y3 = cell1.get_coord('y') - cell2.get_coord('y')
         if x3 > 0:
@@ -47,6 +82,18 @@ class MazeGenerator:
     def generate(self, perfect: bool = True,
                  renderer: MazeRenderer | None = None,
                  index: int = 0) -> None:
+        """
+        Generate the maze using depth-first search algorithm.
+
+        Args:
+            perfect: If True, generates a perfect maze
+            (all cells connected, no loops).
+                     If False, generates an imperfect maze with multiple paths.
+            renderer: Optional MazeRenderer for real-time visualization
+            of generation.
+            index: Color index for the maze renderer animation.
+        """
+
         stack: list[Cell] = []
         stack.append(self.maze.grid[0][0])
         self.maze.grid[0][0].set_visit()
@@ -76,7 +123,18 @@ class MazeGenerator:
 
     def _is_3x3_open(self, start_x: int, start_y: int,
                      c1: Cell, c2: Cell) -> bool:
-        """Vérifie si une zone 3x3 spécifique est totalement ouverte"""
+        """
+        Check if a specific 3x3 area is completely open.
+
+        Args:
+            start_x: X coordinate of the top-left corner of the 3x3 area.
+            start_y: Y coordinate of the top-left corner of the 3x3 area.
+            c1: First cell being considered for wall breaking.
+            c2: Second cell being considered for wall breaking.
+
+        Returns:
+            True if the 3x3 area is completely open, False otherwise.
+        """
         for dy in range(3):
             for dx in range(3):
                 cx = start_x + dx
@@ -100,8 +158,19 @@ class MazeGenerator:
         return True
 
     def _would_form_3x3(self, c1: Cell, c2: Cell) -> bool:
-        'Vérifie si casser le mur entre c1 et '
-        'c2 créerait une zone ouverte de 3x3'
+        """
+        Check whether breaking the wall between c1 and c2 would
+        create a 3x3 open area.
+
+        Args:
+            c1: First cell.
+            c2: Second cell.
+
+        Returns:
+            True if breaking the wall would create a 3x3 open area,
+            False otherwise.
+        """
+
         x1, y1 = c1.get_coord('x'), c1.get_coord('y')
         x2, y2 = c2.get_coord('x'), c2.get_coord('y')
 
@@ -117,7 +186,11 @@ class MazeGenerator:
         return False
 
     def make_imperfect(self) -> None:
-        'Logique du Projet 1 : casse environ 20% des murs restants au hasard'
+        """
+        This method makes the maze imperfect by opening additional walls while
+        ensuring no 3x3 completely open areas are created. The 42 pattern area
+        is preserved from wall breaking.
+        """
         pat_42 = []
         if self.maze.width > 8 and self.maze.height > 7:
             pat_42 = self.maze.pattern_42()

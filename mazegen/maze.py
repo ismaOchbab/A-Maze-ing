@@ -4,8 +4,28 @@ from typing import Tuple, Deque
 
 
 class Maze:
+    """
+        Represents a maze grid composed of cells.
+
+        A Maze is a rectangular grid of cells with defined
+        entry and exit points.
+        It manages the maze structure, pathfinding,
+        and can output the maze in various formats.
+    """
     def __init__(self, width: int, height: int, output: str,
                  entry: dict[str, int], exit: dict[str, int]):
+        """
+        Initialize a new Maze.
+
+        Args:
+            width: The width of the maze (number of columns).
+            height: The height of the maze (number of rows).
+            output: The file path where the maze output will be written.
+            entry: A dictionary with 'x' and 'y' coordinates
+            for the entry point.
+            exit: A dictionary with 'x' and 'y' coordinates for the exit point.
+        """
+
         self.height = height
         self.width = width
         self.entry = entry
@@ -14,6 +34,12 @@ class Maze:
         self.grid: list[list[Cell]] = self._create_empty_grid()
 
     def _create_empty_grid(self) -> list[list[Cell]]:
+        """
+        Create an empty grid of cells for the maze.
+
+        Returns:
+            A 2D list of Cell objects representing the maze grid.
+        """
         grid: list[list[Cell]] = []
         for i in range(0, self.height):
             grid.append([])
@@ -22,9 +48,27 @@ class Maze:
         return grid
 
     def get_cell(self, x: int, y: int) -> Cell:
+        """
+        Retrieve a cell at the specified coordinates.
+
+        Args:
+            x: The x-coordinate (column) of the cell.
+            y: The y-coordinate (row) of the cell.
+
+        Returns:
+            The Cell object at the given coordinates.
+        """
         return self.grid[y][x]
 
     def pattern_42(self) -> list[Cell]:
+        """
+        Generate the 42 pattern - a special decorative pattern in the maze.
+
+        The pattern is centered in the maze and forms the number 42.
+
+        Returns:
+            A list of cells that make up the 42 pattern.
+        """
         mid_x = self.width // 2
         mid_y = self.height // 2
         offsets = [
@@ -48,6 +92,15 @@ class Maze:
         return pat_42
 
     def check_wall(self, cell: Cell) -> list[Cell]:
+        """
+        Get all neighboring cells accessible through broken walls.
+
+        Args:
+            cell: The cell to check neighbors for.
+
+        Returns:
+            A list of neighboring cells that are reachable (walls are broken).
+        """
         x = cell.get_coord('x')
         y = cell.get_coord('y')
         neighbour: list[Cell] = []
@@ -109,6 +162,17 @@ class Maze:
         return ""
 
     def hex_dir(self, c1: Cell, c2: Cell) -> str:
+        """
+        Determine the direction from cell c1 to cell c2.
+
+        Args:
+            c1: The first cell.
+            c2: The second cell.
+
+        Returns:
+            A string representing the direction: 'W' (west), 'E' (east),
+            'N' (north), or 'S' (south).
+        """
         x1, x2 = c1.get_coord('x'), c2.get_coord('x')
         y1, y2 = c1.get_coord('y'), c2.get_coord('y')
         if x1 - x2 > 0:
@@ -121,6 +185,15 @@ class Maze:
             return "S"
 
     def hexa_output(self) -> None:
+        """
+        Output the maze in hexadecimal format to the specified output file.
+
+        The output format includes:
+        - Each cell's wall configuration in hexadecimal (0-F)
+        - Entry point coordinates
+        - Exit point coordinates
+        - Shortest path from entry to exit as a sequence of moves (N, E, S, W)
+        """
         line = ""
         for c in self.grid:
             for i in range(0, self.width):
@@ -141,6 +214,6 @@ class Maze:
         path = self.find_shortest_path((self.entry['x'], self.entry['y']),
                                        (self.exit['x'], self.exit['y']))
         line += (path)
-        file = open(self._output, 'w')
-        file.write(line)
-        file.close()
+        with open(self._output, 'w') as file:
+            file.write(line)
+            file.close()

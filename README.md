@@ -7,10 +7,10 @@
 **A-Maze-ing** is a Python maze generator and terminal visualizer built for the 42 curriculum. The program reads a configuration file, generates a valid maze, writes it to an output file using the required hexadecimal wall encoding, computes the shortest path between the entry and exit, and provides an interactive terminal rendering of the result. The maze also tries to embed a visible **"42" pattern** made of fully closed protected cells when the maze size or the entry/exit coordinates allows it.
 
 The project is organized around reusable core classes:
+- `Parsing`: parses and validates the configuration file.
 - `Cell`: represents one maze cell and its four walls.
 - `Maze`: stores the full maze, validation logic, path-finding, the 42 pattern, and output serialization.
 - `MazeGenerator`: generates the maze structure while preserving protected cells.
-- `Parsing`: parses and validates the configuration file.
 - `MazeRenderer`: displays the maze in the terminal and provides interactive controls.
 
 ## Features
@@ -32,13 +32,14 @@ The project is organized around reusable core classes:
 ├── Makefile
 ├── README.md
 ├── mazegen/              # reusable package modules
+│   ├── README.md         # instructions to reuse the package
 │   ├── __init__.py
 │   ├── cell.py
 │   ├── maze.py
 |   ├── parser.py
 |   ├── maze_generator.py
 │   └── visualizer.py
-└── mazegen_bonus/        # bonus reusable package modules
+└── mazegen_bonus/        # bonus package modules
 │   ├── __init__.py
 │   ├── cell.py
 │   ├── maze.py
@@ -53,7 +54,7 @@ The project is organized around reusable core classes:
 
 The program starts by reading a text configuration file with one `KEY=VALUE` pair per line. Empty lines and lines beginning with `#` are ignored. The parser validates all mandatory fields and raises a clear `ConfigError` when a value is missing or invalid. The current implementation enforces:
 - `WIDTH` and `HEIGHT` as integers
-- `ENTRY` and `EXIT` inside maze bounds
+- `ENTRY` and `EXIT` inside maze bounds (integers)
 - `PERFECT` as a boolean-like value
 - `OUTPUT_FILE` path to the output file as a string
 - optional `SEED` as an integer
@@ -72,7 +73,7 @@ A `Maze` instance is created from the validated configuration. Each cell starts 
 
 ### 3. The "42" pattern
 
-Before generation, the maze attempts to place a centered **42 pattern** using protected cells. These cells remain fully closed so the pattern stays visible in the final rendering. If the maze is too small, or if the pattern would overlap the entry or exit, it is skipped and a warning is printed. The minimum supported size for the pattern in the current implementation is **7x5**.
+Before generation, the maze attempts to place a centered **42 pattern** using protected cells. These cells remain fully closed so the pattern stays visible in the final rendering. If the maze is too small, or if the pattern would overlap the entry or exit, it is skipped and a warning is printed. The minimum supported size for the pattern in the current implementation is **8x7**.
 
 ### 4. Generation
 
@@ -106,7 +107,6 @@ The subject requires one `KEY=VALUE` pair per line, with comments beginning with
 | Optional | `SEED` | integer | `SEED=1` | Seed value stored by the parser |
 | Extra | any other key | string | `SHOW_PATH=true` | Preserved in `config.extra` |
 
-> Note: the parser currently accepts extra keys and stores them, but only the keys above are actively parsed and validated by the uploaded implementation.
 
 ### Example configuration
 
@@ -133,7 +133,34 @@ SHOW_PATH=true
 DISPLAY_FT_PATTERN=true
 ```
 
-## Generation algorithm
+## Main generation algorithm
+
+The chosen generation algorithm is a **randomized backtracker**, which is a depth-first search based maze generation algorithm.
+
+### Principle
+
+1. Start from an initial cell (top-left) and push it to the stack.
+2. Mark the current cell as visited.
+3. While the stack is not empty, look at the cell at the top of the stack.
+4. Find all valid, unvisited neighboring cells.
+5. If there is at least one unvisited neighbor:
+   - Randomly choose one.
+   - Remove the wall between the current cell and the chosen neighbor.
+   - Mark the neighbor as visited and push it to the stack (it becomes the new current cell).
+6. If there are no unvisited neighbors available, pop the cell from the stack to backtrack to the previous one.
+7. **Imperfection phase:** If `PERFECT=False`, randomly break ~20% of internal walls to create loops, while strictly preventing any forbidden 3x3 open areas.
+
+### Why this algorithm
+
+We chose this algorithm because it is:
+- simple to implement and explain,
+- efficient for grid mazes,
+- well suited for building perfect mazes,
+- easy to extend with extra constraints like protected cells and forbidden open areas.
+
+It also matches the project requirements well because it naturally produces a connected maze and can be adapted for imperfect mazes by opening additional passages afterward.
+
+## Bonus generation algorithm
 
 The chosen generation algorithm is a **randomized recursive backtracker**, which is a depth-first search based maze generation algorithm.
 
@@ -161,6 +188,16 @@ It also matches the project requirements well because it naturally produces a co
 ## Path-finding algorithm
 
 The shortest path is computed with **breadth-first search (BFS)**. Starting from the entry, the maze explores reachable neighbors layer by layer until the exit is found. The recorded direction history forms the shortest valid path as a string containing only `N`, `E`, `S`, and `W`.
+
+### Why BFS
+We chose BFS for path-finding because it is:
+
+guaranteed to find the shortest path in an unweighted grid maze, which fully matches our requirement to compute "the shortest path between the entry and exit",
+simple and efficient with O(width × height) time complexity and O(width × height) space complexity, which is optimal for this problem,
+intuitive to implement and verify, with clear layer-by-layer exploration that is easy to debug and understand,
+naturally compatible with our grid-based maze structure where all moves (N, E, S, W) have equal cost,
+appropriate for the project scope, as more complex algorithms like A* or Dijkstra would add unnecessary overhead without benefit since all distances are uniform.
+BFS is the standard and most suitable algorithm for finding shortest paths in unweighted mazes, making it an excellent fit for this implementation.
 
 ## Output file format
 
@@ -199,10 +236,10 @@ The subject requires a visual display that shows walls, entry, exit, and the sol
 
 ### Main Visualizer
 
-- `` for the entry,
-- `` for the exit,
-- `` for protected cells of the 42 pattern,
-- `` for cells belonging to the shortest path when enabled.
+- `🟥` for the entry,
+- `🟪` for the exit,
+- `⬛` for protected cells of the 42 pattern,
+- `🟦` for cells belonging to the shortest path when enabled.
 
 ### Bonus Visualizer
 
@@ -215,15 +252,25 @@ The subject requires a visual display that shows walls, entry, exit, and the sol
 
 The current renderer supports the following keys:
 
+#### Main Visualizer
+
+| Key | Action |
+|---|---|
+| `1` | Regenerate a new maze |
+| `2` | Show/Hide path from entry to exit |
+| `3` | Rotate maze colors |
+| `4` | Export maze in .svg |
+| `5` | Show/Hide maze animation |
+| `6` | Quit the program |
+
 #### Bonus Visualizer
+
 | Key | Action |
 |---|---|
 | `r` | Regenerate a new maze |
 | `p` | Show or hide the shortest path |
 | `c` | Change the color theme |
 | `q` | Quit the program |
-
-These controls are implemented in the interactive loop of `MazeRenderer.run()`.
 
 ## Instructions
 
@@ -238,13 +285,12 @@ python3 a_maze_ing.py <configuration_file_path>
 
 ### With a Makefile
 
-You will need to have Make, UV and python installed on your pc.
+You will need to have Make, UV and python3 installed on your pc.
 
 To install the venv and dependencies, use:
 
 ```bash
 make install
-make build
 ```
 
 To run the program, use :
@@ -263,7 +309,7 @@ make run
 |---|---|
 |Installation|```make install```|
 |Running program|```make run```|
-|Check norm|```make lint-strict```|
+|Check norm|```make lint``` or ```make lint-strict```|
 |Remove uselss files|```make clean```|
 |Remove uselss files and reinstall|```make re```|
 |Build package|```make build```|
@@ -282,9 +328,7 @@ Together, these classes let you parse a config, build a maze, generate it, valid
 ### Minimal example from the current codebase
 
 ```python
-from parser import Parsing
-from maze import Maze
-from maze_generator import MazeGenerator
+from mazegen import Parsing, Maze, MazeGenerator
 
 parser = Parsing("config.txt")
 parser.parse()
@@ -335,15 +379,18 @@ the work was split as follows:
 
 **ichbab**
 - configuration parsing
-- `Cell` and `Maze` objects
-- path-finding and generation algorithm
+- mazegen_bonus package with all its modules
+- pathfinding algorithm
+- package build
 - README
 
 **ykouiri**
 - controller / maze interruption logic
-- `MazeVisualizer` / terminal visualization
+- mazegen package with all its modules
+- generation algorithm
 - package build
-- color, reset, and pause interactions
+- maze animations
+- README
 
 ### Anticipated planning and how it evolved
 
@@ -355,9 +402,10 @@ The natural structure of the project suggests the following evolution:
 5. add path-finding,
 6. add output serialization,
 7. add terminal visualization and interaction,
-8. refine the code for reuse.
+8. add build files and document the code
+9. refine the code for reuse.
 
-In practice, as often happens in school projects, the visualization and interaction layer usually reveal edge cases in the core logic, so validation and rendering tend to evolve together.
+In practice, as often happens in school projects, there was no formal planning for the above tasks. We have split tasks between us based on our respective and interests, dividing the work between core functionality and bonuses.
 
 ### What worked well
 
@@ -368,22 +416,16 @@ In practice, as often happens in school projects, the visualization and interact
 
 ### What could be improved
 
-- Seed reproducibility is documented by the subject and parsed by the code, but the current uploaded generator does not actively call `random.seed(...)` because that line is commented out.
-- Some README content in the original draft referred to controls or packaging details that are not fully reflected in the uploaded Python files.
-- Packaging metadata and tests are not present in the uploaded set of files.
-- The `__main__` block in `a_maze_ing.py` duplicates part of the `main()` workflow and could be simplified.
+- As said above, a rigorous planning of the tasks
+- The visual renderer using MLX library or Curses built-in library
 
 ## Specific tools used
-
-The original README draft mentions the following tools:
 
 | Tool | Usage |
 |---|---|
 | `uv` | dependency and project management |
 | `flake8` | style checking |
 | `mypy` | static type checking |
-
-However, in the uploaded Python files, the current implementation uses standard `sys.argv` parsing and does not directly show `argparse`, `pynput`, or `pydantic`. Those tools should only remain documented here if they are present elsewhere in the full repository.
 
 ## AI usage
 
@@ -392,15 +434,13 @@ AI was used mainly as a support tool for:
 - asking implementation questions about modules,
 - understanding maze-generation and path-finding algorithms.
 
-That matches the intent described in the original README draft and stays aligned with the subject guidance that AI should be used as assistance, not as a replacement for understanding and peer review.
-
 ## Resources
 
-- Jamis Buck, recursive backtracker maze generation demo
-- Maze generation overview on Wikipedia
 - 42 subject PDF for A-Maze-ing
 
 Useful references:
+- https://medium.com/@icodewithben/solving-a-maze-using-depth-first-search-and-backtracking-142228603d1b
+- https://www.puppygraph.com/blog/backtracking-vs-dfs
 - https://www.jamisbuck.org/presentations/rubyconf2011/index.html#recursive-backtracker-demo
 - https://en.wikipedia.org/wiki/Maze_generation_algorithm/
 - http://jamescherti.com/python-flushing-stdin-before-using-input-function/

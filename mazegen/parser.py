@@ -124,9 +124,9 @@ class Parsing:
         self.output_file = raw_config['output_file']
 
         perfect_flag = raw_config['perfect'].lower()
-        if perfect_flag in ('true', '1', 'yes'):
+        if perfect_flag in ('true'):
             self.perfect = True
-        elif perfect_flag in ('false', '0', 'no'):
+        elif perfect_flag in ('false'):
             self.perfect = False
         else:
             raise ConfigError("PERFECT must be True or False")

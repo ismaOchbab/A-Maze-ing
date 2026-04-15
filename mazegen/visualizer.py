@@ -3,10 +3,33 @@ from .maze import Maze
 
 
 class MazeRenderer:
+    """
+    Renders and visualizes a maze in the terminal and as SVG.
+
+    This class handles the visual representation of the maze, including:
+    - Terminal display with colored walls and paths
+    - SVG export for saving the maze as an image file
+    - Path highlighting between entry and exit points
+    - 42 pattern coloring
+    """
+
     def __init__(self, maze: Maze):
+        """
+        Initialize the MazeRenderer.
+
+        Args:
+            maze: The Maze object to render.
+        """
         self.maze = maze
 
     def color_42(self, grid: list[list[str]], pat_42: list[Cell]) -> None:
+        """
+        Color the 42 pattern cells with a distinct background color.
+
+        Args:
+            grid: The 2D grid representing the maze display.
+            pat_42: A list of cells that form the 42 pattern.
+        """
         for c in self.maze.grid:
             for i in range(0, self.maze.width):
                 cx = (c[i].get_coord('x') * 2) + 1
@@ -16,10 +39,15 @@ class MazeRenderer:
 
     def _get_path_cells(self) -> list[Cell]:
         """
-        Convertit la chaîne de direction ("EESSW...") en une liste d'objets
-        Cell pour que le display puisse les utiliser.
+        Convert the direction string ("EESSW...") into a list of Cell objects
+        that can be used by the display method.
+
+        Returns:
+            A list of Cell objects representing the shortest path
+            from entry to exit.
+            Returns an empty list if no path exists.
         """
-        # 1. On récupère le string ("ESSEE...") via le BFS
+        # 1. Retrieve the direction string ("ESSEE...") via BFS
         path_str = self.maze.find_shortest_path(
             (self.maze.entry['x'], self.maze.entry['y']),
             (self.maze.exit['x'], self.maze.exit['y'])
@@ -28,15 +56,15 @@ class MazeRenderer:
         if not path_str:
             return []
 
-        # 2. On commence aux coordonnées de l'entrée
+        # 2. Start at the entry coordinates
         x = self.maze.entry['x']
         y = self.maze.entry['y']
 
-        # 3. On initialise la liste avec la Cellule de départ
+        # 3. Initialize the list with the starting cell
         cells = [self.maze.get_cell(x, y)]
 
-        # 4. On lit chaque lettre, on avance,
-        # et on attrape la Cell correspondante
+        # 4. Read each direction letter, advance coordinates,
+        # and append the corresponding cell to the list
         for move in path_str:
             if move == 'N':
                 y -= 1
@@ -52,17 +80,27 @@ class MazeRenderer:
         return cells
 
     def display(self, show_path: bool, index: int) -> None:
+        """
+        Display the maze in the terminal
+        with colored walls and optional path visualization.
+
+        Args:
+            show_path: If True, displays the shortest path
+            from entry to exit in blue.
+            index: Color index for wall colors (0-6).
+            Rotates through available colors.
+        """
         grid = [["   " if x % 2 == 1 else "  "
                  for x in range((self.maze.width * 2) + 1)]
                 for _ in range((self.maze.height * 2) + 1)]
         WALL_COLORS = [
-                    "\033[107m",  # Index 0 : Blanc (Défaut)
-                    "\033[48;5;130m",  # Index 1 : Rouge clair
-                    "\033[102m",  # Index 2 : Vert clair
-                    "\033[103m",  # Index 3 : Jaune clair
-                    "\033[104m",  # Index 4 : Bleu clair
-                    "\033[105m",  # Index 5 : Violet clair
-                    "\033[106m"   # Index 6 : Cyan clair
+                    "\033[107m",  # Index 0 : White (Default)
+                    "\033[48;5;130m",  # Index 1 : Dark orange / Rust
+                    "\033[102m",  # Index 2 : Light green
+                    "\033[103m",  # Index 3 : Light yellow
+                    "\033[104m",  # Index 4 : Light blue
+                    "\033[105m",  # Index 5 : Light purple
+                    "\033[106m"   # Index 6 : Light cyan
                     ]
         final_path = self._get_path_cells()
         if self.maze.width > 8 and self.maze.height > 7:
@@ -123,6 +161,15 @@ class MazeRenderer:
             print("".join(row))
 
     def export(self, show_path: bool, index: int) -> None:
+        """
+        Export the maze as an SVG file named "maze.svg".
+
+        Args:
+            show_path: If True, includes the shortest
+            path in the SVG (displayed in blue).
+            index: Color index for wall colors (0-6).
+            Rotates through available colors.
+        """
         WALL_COLORS = [
             "#FFFFFF",  # Index 0 : White (Default)
             "#D75F00",  # Index 1 : Dark orange / Rust (Matches \033[48;5;130m)
